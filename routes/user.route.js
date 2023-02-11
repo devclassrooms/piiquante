@@ -5,6 +5,6 @@ const userCrontroller = require("../controllers/user.controller");
 //Créer une requête POST pour User
 
 router.post(`/signup`, userCrontroller.signUp);
-router.post(`/login`, userCrontroller.userLogin);
+router.post(`/login`, userCrontroller.login);
 
 module.exports = router;

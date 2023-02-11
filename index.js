@@ -15,7 +15,7 @@ function checkToken(req, res)
   {
     const theToken = req.header('Authorization').split(" ")[1]
     console.log('abc', theToken)
-    webToken.verify(theToken, "abcd");
+    webToken.verify(theToken, "abc");
     res.status(200);
     res.send("ok")
   }
