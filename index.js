@@ -8,22 +8,103 @@ const { config } = require('dotenv');
 require('dotenv').config();
 const webToken = require('jsonwebtoken')
 const password = process.env.mpt;
+const router = express.Router();
+const multer = require('multer')
+const stock = multer.diskStorage({destination: "image/", filename: thefile})
+const mlt = multer({storage: stock})
 
-function checkToken(req, res)
+function thefile(req, file, e)
+{
+  e(null, "sauce" + req.body.userId + Date.now() + file.originalname)
+}
+
+const sauceShema = new mongoose.Schema({
+    userId : String, 
+    name : String,
+    manufacturer : String,
+    description : String,
+    mainPepper : String,
+    imageUrl : String,
+    heat : Number,
+    likes : Number,
+    dislikes : Number,
+    usersLiked : [ "String <userId>" ],
+    usersDisliked : [ "String <userId>" ]
+})
+const sauceItem = mongoose.model("Sauces", sauceShema);
+
+async function postSauce(req, res)
+{
+  const infoProduct = req.body.name
+  const sauceArray= JSON.parse(req.body.sauce)
+  console.log(req.body);
+  console.log("thefile",req.file);
+  console.log("la sauce", sauceArray)
+  const sauces = [
+    {
+      userId : sauceArray.userId, 
+      name : sauceArray.name,
+      manufacturer : sauceArray.manufacturer,
+      description : sauceArray.description,
+      mainPepper : sauceArray.mainPepper,
+      imageUrl : "sauceArray",
+      heat : sauceArray.heat,
+      likes : 1,
+      dislikes : 1,
+      usersLiked : [ "String <userId>" ],
+      usersDisliked : [ "String <userId>" ]
+    },
+  ];
+  sauceItem.insertMany(sauces).then((product) => {
+    console.log('enregistrer')
+    res.send({message: 'Produit enregistré'})
+    res.status(200)
+  })
+}
+
+
+async function getSauce(req, res)
+{
+  const sauces = [
+    {
+      userId : "String", 
+      name : "String",
+      manufacturer : "String",
+      description : "String",
+      mainPepper : "String",
+      imageUrl : "String",
+      heat : 2,
+      likes : 2,
+      dislikes : 2,
+      usersLiked : [ "String <userId>" ],
+      usersDisliked : [ "String <userId>" ]
+    },
+  ];
+  sauceItem.find({}).then(product => res.send(product))
+  res.status(200)
+}
+
+function checkToken(req, res, next)
 {
   if((req.header('Authorization')) != "")
   {
     const theToken = req.header('Authorization').split(" ")[1]
-    console.log('abc', theToken)
-    webToken.verify(theToken, "abc");
-    res.status(200);
-    res.send("ok")
+    console.log(theToken)
+    webToken.verify(theToken, "RANDOM_SECRET");
+    //res.send(creatSauce()).status(200);
+    next()
+    
   }
   else
   {
     res.status(400);
     res.send({message: "Bad token"})
   }
+}
+
+async function getSauces(req, res)
+{
+  sauceItem.find({}).then('check')
 }
 
 app.use(cors())
@@ -42,7 +123,8 @@ console.log("mpt",process.env.mpt);
 
 app.use(bodyParser.json())
 app.use('/api/auth/', userRoutes)
-app.use('/api/sauces', checkToken)
+app.get('/api/sauces', checkToken, getSauce)
+app.post('/api/sauces', checkToken, mlt.single("image") , postSauce)
 app.listen(3000, () =>console.log("Listening on port " + 3000));
 
 

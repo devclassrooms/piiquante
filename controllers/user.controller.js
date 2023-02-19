@@ -19,7 +19,7 @@ async function signUp(req, res) {
 }
 
 async function generateJWT(id) {
-    const theToken = jwt.sign({ userId: id }, "RANDOM_SECRET", { expiresIn: "4h" })
+    const theToken = jwt.sign({ userId: id }, "RANDOM_SECRET", { expiresIn: "24h" })
     console.log(theToken);
     return (theToken);
 }
