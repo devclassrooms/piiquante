@@ -5,6 +5,8 @@ async function postSauce(req, res)
 {
   const infoProduct = req.body.name
   const sauceArray= JSON.parse(req.body.sauce)
+  const localhost = "http://localhost:3000/"
+  const theImageUrl = localhost + req.file.destination + req.file.filename;
   const sauces = [
     {
       userId : sauceArray.userId, 
@@ -12,7 +14,7 @@ async function postSauce(req, res)
       manufacturer : sauceArray.manufacturer,
       description : sauceArray.description,
       mainPepper : sauceArray.mainPepper,
-      imageUrl : "sauceArray",
+      imageUrl : theImageUrl,
       heat : sauceArray.heat,
       likes : 0,
       dislikes : 0,
@@ -22,6 +24,8 @@ async function postSauce(req, res)
   ];
   Sauce.insertMany(sauces).then((product) => {
     console.log('enregistrer')
+    console.log(sauces)
+    console.log(theImageUrl)
     res.send({message: 'Produit enregistré'})
     res.status(200)
   })

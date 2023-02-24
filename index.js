@@ -8,6 +8,7 @@ const cors = require("cors");
 const { config } = require('dotenv');
 require('dotenv').config();
 
+
 const password = process.env.mpt;
 
 app.use(cors())
@@ -24,6 +25,7 @@ mongoose.connect(`mongodb+srv://paste:${password}@cluster0.t4j9fwn.mongodb.net/?
 
 console.log("mpt",process.env.mpt);
 
+app.use('/image', express.static('./image'))//rendre accessible avec express le dossier image
 app.use(bodyParser.json())
 app.use('/api/auth', userRoutes)
 app.use('/api/sauces', sauceRoutes)

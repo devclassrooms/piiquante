@@ -9,7 +9,7 @@ async function signUp(req, res) {
     console.log(passwordHash);
     const user = new User({
         email: req.body.email,
-        password: passwordHash//req.body.password
+        password: passwordHash
     });
     user.save().then(() => {
         res.status(200).send('sign up successfull')
