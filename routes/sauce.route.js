@@ -16,9 +16,17 @@ function thefile(req, file, e)
 
 function deleteItem(req, res)
 {
+  
   const theId = req.params.id
   Sauce.findByIdAndDelete(theId)
-    .then((sauce) => res.send({message : "The sauce is deleted", sauce}))
+    .then((sauce) => {
+      console.log(sauce)
+      const filename = sauce.imageUrl.split('/images/')[1];
+      fs.unlink(`images/${filename}`, () => {
+        // si la suppression réussit, executer cette ligne
+        res.send({message : "The sauce is deleted", sauce})
+      })
+    })
     .catch((error) => console.log(error))
   console.log('Sauce Id', theId)
 }
@@ -49,47 +57,54 @@ function updateItem(req, res)
 
 function oneLike(req, res)
 {
-  const theId = req.params.id
-  const thelike = req.body.like;
-  const theUserId = req.body.userId
-  let theUsersLiked
-  if(thelike == 1)
-  {
-    Sauce.findByIdAndUpdate(theId, {})
-    .then((sauce) => {
-      console.log ({message : "1 Like", sauce}, sauce.likes)
-      let lesLike = Number(sauce.likes + (+1))
-      if(sauce.usersLiked != "")
-        theUsersLiked = sauce.usersLiked + " " + theUserId
-      else
-        theUsersLiked =  theUserId
-      Sauce.findByIdAndUpdate(theId, {likes : lesLike, usersLiked: theUsersLiked})
-        .then(() => {res.send({message : "+1 Like"}).status(200)})
-        .catch((error) => console.log(error))
-    })
-    .catch((error) => console.log(error))
-  }
-  else if(thelike == -1)
-  {
-    Sauce.findByIdAndUpdate(theId, {})
-    .then((sauce) => {
-      console.log ({message : "1 Dislike", sauce}, sauce.dislikes)
-      let lesDislike = Number(sauce.dislikes + (-1))
-      if(sauce.usersDisliked != "")
-        theUsersLiked = sauce.usersDisliked + " " + theUserId
-      else
-        theUsersLiked =  theUserId
-      Sauce.findByIdAndUpdate(theId, {dislikes : lesDislike, usersDisliked: theUsersLiked})
-        .then(() => {res.send({message : "+1 Dislike"}).status(200)})
-        .catch((error) => console.log(error))
-    })
-    .catch((error) => console.log(error))
-  }
-  else if(thelike == 0)
-  {
-    res.send({message : "Error likes"}).status(404)
-  }
-  console.log("*", req.body, "*")
+  const thelike = req.body.like
+  Sauce.findOne({_id : req.params.id}).then((sauce) => {
+    console.log("****", sauce, "*****")
+    if(thelike == 1)
+    {
+      Sauce.updateOne({ _id: req.params.id }, {
+        $inc: { likes: 1 },
+        $push: { usersLiked: req.body.userId },
+        _id: req.params.id
+      })
+      .then(() => {res.status(200).send({message : "+1 Like"})})
+      .catch((error) => {res.status(400).send({message : error})})
+    }
+    else if(thelike == -1)
+    {
+        Sauce.updateOne({ _id: req.params.id }, {
+          $inc: { dislikes: 1 },
+          $push: { usersDisliked: req.body.userId },
+          _id: req.params.id
+        })
+        .then(() => {res.status(200).send({message : "+1 Dislike"})})
+        .catch((error) => {res.status(400).send({message : error})})
+    }
+    else if(thelike == 0)
+    {
+      if(sauce.usersLiked.find(user => user === req.body.userId))
+      {
+        Sauce.updateOne({ _id: req.params.id }, {
+          $inc: { likes: -1 },
+          $pull: { usersLiked: req.body.userId },
+          _id: req.params.id
+        })
+        .then(() => {res.status(200).send({message : "0 Like"})})
+        .catch((error) => {res.status(400).send({message : error})})
+      }
+    }
+    if(sauce.usersDisliked.find(user => user === req.body.userId))        
+      {
+        Sauce.updateOne({ _id: req.params.id }, {
+          $inc: { dislikes: -1 },
+          $pull: { usersDisliked: req.body.userId },
+          _id: req.params.id
+        })
+        .then(() => {res.status(200).send({message : "0 Like"})})
+        .catch((error) => {res.status(400).send({message : error})})
+      }
+    console.log("*", req.body, "*")
+  })
 }
 
 router.get('/', checkToken, sauceCrontroller.getSauces)
