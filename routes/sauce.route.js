@@ -35,6 +35,7 @@ function updateItem(req, res)
 {
   const theId = req.params.id
   const changeSauce = req.body.sauce
+  const changeTheSauce = req.body
   if (req.file != null)
   {
     const sauceObj = JSON.parse(req.body.sauce)
@@ -47,10 +48,9 @@ function updateItem(req, res)
         return(Sauce.findByIdAndUpdate(theId, sauceObj))
       })
       .catch((error) => console.log(error))
-    
   }
-  Sauce.findByIdAndUpdate(theId, changeSauce)
-    .then((sauce) => res.send({message : "The sauce is change", sauce}))
+  Sauce.findByIdAndUpdate(theId, changeTheSauce)
+    .then((sauce) => res.send({message : "The sauce is change1111", sauce}))
     .catch((error) => console.log(error))
   console.log('Sauce Id', theId, req.body)
 }
