@@ -8,7 +8,7 @@ const stock = multer.diskStorage({destination: "image/", filename: thefile})
 const mlt = multer({storage: stock})
 const Sauce = require("../models/sauce.model");
 const { findById } = require("../models/sauce.model");
-
+const fs = require("fs")
 function thefile(req, file, e)
 {
   e(null, "sauce" + Date.now() + file.originalname)
@@ -21,8 +21,8 @@ function deleteItem(req, res)
   Sauce.findByIdAndDelete(theId)
     .then((sauce) => {
       console.log(sauce)
-      const filename = sauce.imageUrl.split('/images/')[1];
-      fs.unlink(`images/${filename}`, () => {
+      const filename = sauce.imageUrl.split('/image/')[1];
+      fs.unlink(`image/${filename}`, () => {
         // si la suppression réussit, executer cette ligne
         res.send({message : "The sauce is deleted", sauce})
       })
