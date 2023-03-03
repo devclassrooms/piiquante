@@ -23,9 +23,6 @@ async function postSauce(req, res)
     },
   ];
   Sauce.insertMany(sauces).then((product) => {
-    console.log('enregistrer')
-    console.log(sauces)
-    console.log(theImageUrl)
     res.send({message: 'Produit enregistré'})
     res.status(200)
   })
@@ -41,11 +38,17 @@ async function getSauces(req, res)
 
 async function getSauce(req, res)
 {
-    console.log(req.params.id)
     Sauce.findOne({
         _id: req.params.id,
       })
-        .then((sauce) => res.status(200).json(sauce))
+        .then((sauce) => {
+          if(sauce == null)
+          {
+            res.status(400).json(sauce)
+          }
+          else
+            res.status(200).json(sauce)
+        })
         .catch((error) => res.status(404).json({ error }));
 }
 

@@ -20,7 +20,8 @@ function deleteItem(req, res)
   const theId = req.params.id
   Sauce.findByIdAndDelete(theId)
     .then((sauce) => {
-      console.log(sauce)
+      if(sauce == null)
+        res.status(500).send({message : "The sauce is deleted", sauce})
       const filename = sauce.imageUrl.split('/image/')[1];
       fs.unlink(`image/${filename}`, () => {
         // si la suppression réussit, executer cette ligne
@@ -28,7 +29,6 @@ function deleteItem(req, res)
       })
     })
     .catch((error) => console.log(error))
-  console.log('Sauce Id', theId)
 }
 
 function updateItem(req, res)
@@ -39,27 +39,37 @@ function updateItem(req, res)
   if (req.file != null)
   {
     const sauceObj = JSON.parse(req.body.sauce)
-    console.log("*****", sauceObj, "*****")
     const e = "http://localhost:3000/image/" + req.file.filename
     const autre = {imageUrl : e }
     Sauce.findByIdAndUpdate(theId, autre)
       .then((sauce) => {
-        console.log ({message : "The sauce is change", sauce})
+        if(sauce == null)
+        {
+          res.status(500).send({message : sauce})
+        }
         return(Sauce.findByIdAndUpdate(theId, sauceObj))
       })
       .catch((error) => console.log(error))
   }
   Sauce.findByIdAndUpdate(theId, changeTheSauce)
-    .then((sauce) => res.send({message : "The sauce is change1111", sauce}))
+    .then((sauce) => {
+      if(sauce == null)
+      {
+        res.status(500).send({message : "Error"})
+      }
+      res.send({message : "The sauce is change", sauce})
+    })
     .catch((error) => console.log(error))
-  console.log('Sauce Id', theId, req.body)
 }
 
 function oneLike(req, res)
 {
   const thelike = req.body.like
   Sauce.findOne({_id : req.params.id}).then((sauce) => {
-    console.log("****", sauce, "*****")
+    if(sauce == null)
+    {
+      res.status(400).send({message : "Error"})
+    }
     if(thelike == 1)
     {
       Sauce.updateOne({ _id: req.params.id }, {
@@ -103,7 +113,6 @@ function oneLike(req, res)
         .then(() => {res.status(200).send({message : "0 Like"})})
         .catch((error) => {res.status(400).send({message : error})})
       }
-    console.log("*", req.body, "*")
   })
 }
 

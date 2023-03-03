@@ -23,8 +23,6 @@ mongoose.connect(`mongodb+srv://paste:${password}@cluster0.t4j9fwn.mongodb.net/?
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.log("Connexion à MongoDB échouée !"));
 
-console.log("mpt",process.env.mpt);
-
 app.use('/image', express.static('./image'))//rendre accessible avec express le dossier image
 app.use(bodyParser.json())
 app.use('/api/auth', userRoutes)
